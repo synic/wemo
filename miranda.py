@@ -799,7 +799,7 @@ class upnp:
 def msearch(argc, argv, hp, cycles=99999999):
 	defaultST = "upnp:rootdevice"
 	st = "schemas-upnp-org"
-	myip = '192.168.1.141'
+	myip = ''
 	lport = hp.port
 
 	if argc >= 3:
@@ -836,7 +836,7 @@ def msearch(argc, argv, hp, cycles=99999999):
 		try:
 			hp.parseSSDPInfo(hp.listen(1024,server),False,False)
 		except Exception:
-			print 'Discover mode halted...'
+			print 'Discover mode halted because of error...'
 			server.close()
 			break
 		cycles -= 1
