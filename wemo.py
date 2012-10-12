@@ -1,22 +1,31 @@
 from miranda import upnp, msearch
+import shelve
 
 conn = upnp()
-msearch(0, 0, conn, 3)
+
+a = shelve.open("/home/synic/Projects/alexemo/shelve.db")
+if not 'HOSTS' in a:
+    msearch(0, 0, conn, 4)
+    a['HOSTS'] = conn.ENUM_HOSTS
+
+HOSTS = a['HOSTS']
+conn.ENUM_HOSTS = HOSTS
+a.close()
 
 SWITCHES = []
 
 # populate all the host info, for every upnp device on the network
-for index in conn.ENUM_HOSTS:
+for index in HOSTS:
     
-    hostInfo = conn.ENUM_HOSTS[index]
+    hostInfo = HOSTS[index]
     if hostInfo['dataComplete'] == False:
         xmlHeaders, xmlData = conn.getXML(hostInfo['xmlFile'])
         conn.getHostInfo(xmlData,xmlHeaders,index)
 
 
-for index in conn.ENUM_HOSTS:
+for index in HOSTS:
     try:
-        if conn.ENUM_HOSTS[index]['deviceList']['controllee']['modelName'] == 'Socket':
+        if HOSTS[index]['deviceList']['controllee']['modelName'] == 'Socket':
             SWITCHES = [index]
     except KeyError:
         pass
@@ -25,7 +34,7 @@ for index in conn.ENUM_HOSTS:
 def _send(action, args=None):
     if not args:
         args = {}
-    host_info = conn.ENUM_HOSTS[SWITCHES[0]]
+    host_info = HOSTS[SWITCHES[0]]
     device_name = 'controllee'
     service_name = 'basicevent'
     controlURL = host_info['proto'] + host_info['name']
